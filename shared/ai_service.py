@@ -3,10 +3,13 @@ import os
 import logging
 import random
 from typing import Optional, Dict, List
-from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+# Load environment variables (safe for environments without .env)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    pass  # .env file not needed in production (Vercel uses env vars)
 
 logger = logging.getLogger(__name__)
 

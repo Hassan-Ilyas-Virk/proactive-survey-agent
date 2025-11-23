@@ -13,9 +13,6 @@ from contextlib import asynccontextmanager
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
-# Set working directory to project root for relative path resolution
-os.chdir(project_root)
-
 from agents.workers.proactive_survey_agent import ProactiveSurveyAgent
 from communication.models import SurveyRequest, SurveyResponse, AgentRegistration
 from shared.utils import load_json_config, get_timestamp
