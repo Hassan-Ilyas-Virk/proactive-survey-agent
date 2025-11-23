@@ -35,7 +35,7 @@
    - Select all environments (Production, Preview, Development)
    - Redeploy if needed
 
-5. **Done!** Your API will be live at `https://your-project.vercel.app`
+5. **Done!** Your API will be live at `https://proactive-survey-agent.vercel.app`
 
 ### Method 2: Via Vercel CLI
 
@@ -71,10 +71,10 @@ After deployment, test your API:
 
 ```bash
 # Health check
-curl https://your-project.vercel.app/health
+curl https://proactive-survey-agent.vercel.app/health
 
 # Test analyze endpoint
-curl -X POST https://your-project.vercel.app/analyze \
+curl -X POST https://proactive-survey-agent.vercel.app/analyze \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "test_user",
@@ -84,7 +84,7 @@ curl -X POST https://your-project.vercel.app/analyze \
   }'
 
 # View API docs
-# Open in browser: https://your-project.vercel.app/docs
+# Open in browser: https://proactive-survey-agent.vercel.app/docs
 ```
 
 ## 📝 Important Notes
@@ -113,5 +113,5 @@ curl -X POST https://your-project.vercel.app/analyze \
 
 - [Vercel Python Documentation](https://vercel.com/docs/functions/serverless-functions/runtimes/python)
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
-- Your API Docs: `https://your-project.vercel.app/docs`
+- Your API Docs: [https://proactive-survey-agent.vercel.app/docs](https://proactive-survey-agent.vercel.app/docs)
 

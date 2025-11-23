@@ -2,6 +2,7 @@
 import logging
 import sys
 import os
+from pathlib import Path
 from typing import Optional
 from datetime import datetime
 from fastapi import FastAPI, HTTPException
@@ -9,13 +10,17 @@ import httpx
 from contextlib import asynccontextmanager
 
 # Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+project_root = Path(__file__).parent
+sys.path.insert(0, str(project_root))
+
+# Set working directory to project root for relative path resolution
+os.chdir(project_root)
 
 from agents.workers.proactive_survey_agent import ProactiveSurveyAgent
 from communication.models import SurveyRequest, SurveyResponse, AgentRegistration
 from shared.utils import load_json_config, get_timestamp
 
-# Load configuration
+# Load configuration (using relative path, load_json_config will resolve it)
 config = load_json_config("config/agent_config.json")
 
 # Setup logging

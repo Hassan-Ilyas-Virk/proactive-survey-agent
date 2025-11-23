@@ -86,7 +86,7 @@ git push origin main
 4. **Deploy**:
    - Click "Deploy"
    - Wait for the build to complete
-   - Your API will be live at `https://your-project.vercel.app`
+   - Your API will be live at `https://proactive-survey-agent.vercel.app`
 
 #### Option 2: Deploy via Vercel CLI
 
@@ -119,17 +119,17 @@ vercel --prod
 ### Post-Deployment
 
 After deployment, your API will be available at:
-- **Production**: `https://your-project.vercel.app`
-- **Preview**: `https://your-project-git-branch.vercel.app`
+- **Production**: `https://proactive-survey-agent.vercel.app`
+- **Preview**: `https://proactive-survey-agent-git-branch.vercel.app`
 
 ### Testing the Deployed API
 
 ```bash
 # Health check
-curl https://your-project.vercel.app/health
+curl https://proactive-survey-agent.vercel.app/health
 
 # Test analysis endpoint
-curl -X POST https://your-project.vercel.app/analyze \
+curl -X POST https://proactive-survey-agent.vercel.app/analyze \
   -H "Content-Type: application/json" \
   -d '{
     "user_id": "user123",
@@ -229,4 +229,5 @@ This project is part of a university course project.
 ## 🔗 Links
 
 - **GitHub**: [https://github.com/Hassan-Ilyas-Virk/proactive-survey-agent](https://github.com/Hassan-Ilyas-Virk/proactive-survey-agent)
-- **API Docs**: Available at `/docs` endpoint when running locally or deployed
+- **Live API**: [https://proactive-survey-agent.vercel.app](https://proactive-survey-agent.vercel.app)
+- **API Docs**: [https://proactive-survey-agent.vercel.app/docs](https://proactive-survey-agent.vercel.app/docs)

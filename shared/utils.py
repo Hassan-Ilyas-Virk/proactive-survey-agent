@@ -36,19 +36,37 @@ def load_json_config(config_path: str) -> dict:
     Load JSON configuration file
     
     Args:
-        config_path: Path to JSON config file
+        config_path: Path to JSON config file (relative or absolute)
         
     Returns:
         Configuration dictionary
     """
     try:
-        with open(config_path, 'r') as f:
+        # If path is relative, try to resolve it relative to project root
+        if not os.path.isabs(config_path):
+            # Try multiple possible project roots
+            current_file = Path(__file__).resolve()
+            # shared/utils.py -> project root
+            project_root = current_file.parent.parent
+            
+            # Try the relative path from project root
+            full_path = project_root / config_path
+            if not full_path.exists():
+                # Try current working directory as fallback
+                full_path = Path(config_path)
+        else:
+            full_path = Path(config_path)
+        
+        with open(full_path, 'r') as f:
             return json.load(f)
     except FileNotFoundError:
-        print(f"Config file not found: {config_path}")
+        print(f"Config file not found: {config_path} (tried: {full_path if 'full_path' in locals() else config_path})")
         return {}
     except json.JSONDecodeError as e:
         print(f"Error parsing JSON config: {e}")
+        return {}
+    except Exception as e:
+        print(f"Unexpected error loading config: {e}")
         return {}
 
 
@@ -124,6 +142,21 @@ class LTMFileStorage:
     
     def __init__(self, agent_name: str, base_path: str = "shared/LTM"):
         self.agent_name = agent_name
+        
+        # In serverless environments (like Vercel), use /tmp for writable storage
+        # Check if we're in a serverless environment
+        is_serverless = os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME") or os.environ.get("FUNCTION_TARGET")
+        
+        if is_serverless:
+            # Use /tmp in serverless environments
+            base_path = "/tmp/ltm"
+        
+        # Resolve relative paths to absolute
+        if not os.path.isabs(base_path):
+            current_file = Path(__file__).resolve()
+            project_root = current_file.parent.parent
+            base_path = str(project_root / base_path)
+        
         self.storage_path = os.path.join(base_path, agent_name)
         ensure_directory(self.storage_path)
     
