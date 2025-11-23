@@ -3,7 +3,6 @@ import os
 import logging
 import random
 from typing import Optional, Dict, List
-import google.generativeai as genai
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -11,13 +10,27 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+# Try to import Gemini, but continue without it if not available
+try:
+    import google.generativeai as genai
+    GENAI_AVAILABLE = True
+except ImportError:
+    logger.warning("google-generativeai not installed. AI features will use fallback logic.")
+    GENAI_AVAILABLE = False
+    genai = None
+
 # Configure Gemini
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
-    logger.info("Gemini API configured successfully")
-else:
+if GEMINI_API_KEY and GENAI_AVAILABLE:
+    try:
+        genai.configure(api_key=GEMINI_API_KEY)
+        logger.info("Gemini API configured successfully")
+    except Exception as e:
+        logger.warning(f"Failed to configure Gemini: {e}")
+elif not GEMINI_API_KEY:
     logger.warning("GEMINI_API_KEY not found. AI features will use fallback logic.")
+elif not GENAI_AVAILABLE:
+    logger.warning("Gemini package not available. AI features will use fallback logic.")
 
 
 class AIService:
@@ -27,7 +40,7 @@ class AIService:
         self.model = None
         self.ai_enabled = False
         
-        if GEMINI_API_KEY:
+        if GEMINI_API_KEY and GENAI_AVAILABLE:
             try:
                 self.model = genai.GenerativeModel('gemini-pro')
                 self.ai_enabled = True
@@ -36,7 +49,7 @@ class AIService:
                 logger.error(f"Failed to initialize Gemini: {e}")
                 self.ai_enabled = False
         else:
-            logger.info("AI Service initialized in fallback mode (no API key)")
+            logger.info("AI Service initialized in fallback mode")
     
     def analyze_sentiment_ai(self, text: str) -> Dict:
         """

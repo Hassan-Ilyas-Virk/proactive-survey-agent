@@ -32,8 +32,20 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# Agent instance
-agent = ProactiveSurveyAgent()
+# Agent instance - lazy initialization to avoid crashes at import time
+agent = None
+
+def get_agent():
+    """Get or create the agent instance"""
+    global agent
+    if agent is None:
+        try:
+            agent = ProactiveSurveyAgent()
+            logger.info("Agent initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize agent: {e}")
+            raise HTTPException(status_code=500, detail=f"Agent initialization failed: {str(e)}")
+    return agent
 
 
 async def register_with_supervisor():
@@ -124,11 +136,14 @@ async def analyze_user(request: SurveyRequest):
     try:
         logger.info(f"Received analyze request for user: {request.user_id}")
         
+        # Get agent instance
+        agent_instance = get_agent()
+        
         # Convert request to dict for processing
         request_data = request.model_dump()
         
         # Process through agent
-        result = agent.analyze_request(request_data)
+        result = agent_instance.analyze_request(request_data)
         
         # Send heartbeat to supervisor after successful operation
         await send_heartbeat()
@@ -146,9 +161,18 @@ async def health_check():
     Health check endpoint for monitoring.
     Returns agent status and system information.
     """
-    status = agent.get_status()
-    status["api_version"] = config.get("version", "1.0.0")
-    return status
+    try:
+        agent_instance = get_agent()
+        status = agent_instance.get_status()
+        status["api_version"] = config.get("version", "1.0.0")
+        return status
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        return {
+            "status": "unhealthy",
+            "error": str(e),
+            "api_version": config.get("version", "1.0.0")
+        }
 
 
 @app.get("/status")

@@ -55,11 +55,16 @@ class ProactiveSurveyAgent(AbstractWorkerAgent):
         self.agent_name = AGENT_NAME
         self.version = AGENT_VERSION
         
-        # Initialize LTM storage (file-based)
-        self.ltm = LTMFileStorage(
-            agent_name=self.agent_name,
-            base_path=config.get("ltm_config", {}).get("base_directory", "shared/LTM")
-        )
+        # Initialize LTM storage (file-based) with error handling
+        try:
+            self.ltm = LTMFileStorage(
+                agent_name=self.agent_name,
+                base_path=config.get("ltm_config", {}).get("base_directory", "shared/LTM")
+            )
+        except Exception as e:
+            logger.warning(f"Failed to initialize LTM storage: {e}. Agent will continue without persistent storage.")
+            # Create a dummy LTM object that doesn't persist
+            self.ltm = None
         
         # Message queue for supervisor communication
         self.message_queue = []
@@ -68,7 +73,8 @@ class ProactiveSurveyAgent(AbstractWorkerAgent):
         self.ai_service = ai_service
         
         ai_status = "enabled" if self.ai_service.ai_enabled else "fallback mode"
-        logger.info(f"Initialized {self.agent_name} v{self.version} with AI {ai_status}")
+        ltm_status = "enabled" if self.ltm else "disabled"
+        logger.info(f"Initialized {self.agent_name} v{self.version} with AI {ai_status}, LTM {ltm_status}")
     
     # --- Implement Abstract Methods ---
     
@@ -151,6 +157,9 @@ class ProactiveSurveyAgent(AbstractWorkerAgent):
         Returns:
             True on success, False otherwise
         """
+        if self.ltm is None:
+            logger.debug("LTM not available, skipping write")
+            return False
         try:
             success = self.ltm.write(key, value)
             if success:
@@ -170,6 +179,9 @@ class ProactiveSurveyAgent(AbstractWorkerAgent):
         Returns:
             Stored value or None if not found
         """
+        if self.ltm is None:
+            logger.debug("LTM not available, returning None")
+            return None
         try:
             value = self.ltm.read(key)
             if value:
