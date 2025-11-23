@@ -1,0 +1,54 @@
+# Global System Settings
+
+# Supervisor Configuration
+supervisor:
+  host: "localhost"
+  port: 8000
+  url: "http://localhost:8000"
+  timeout: 30
+
+# Agent Configuration
+agents:
+  proactive_survey:
+    name: "ProactiveSurveyAgent"
+    type: "survey_agent"
+    port: 8001
+    version: "1.0.0"
+    capabilities:
+      - "survey_analysis"
+      - "sentiment_detection"
+      - "feedback_generation"
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/agent.log"
+
+# Survey Configuration
+survey:
+  min_days_between_surveys: 30
+  negative_keywords:
+    - "negative"
+    - "complaint"
+    - "issue"
+    - "problem"
+    - "dissatisfied"
+    - "unhappy"
+    - "disappointed"
+    - "frustrated"
+    - "broken"
+    - "defect"
+  positive_keywords:
+    - "positive"
+    - "happy"
+    - "satisfied"
+    - "great"
+    - "excellent"
+
+# LTM Storage Configuration
+ltm:
+  storage_type: "file"  # Options: file, database, redis
+  base_path: "shared/LTM"
+  retention_days: 90
+
