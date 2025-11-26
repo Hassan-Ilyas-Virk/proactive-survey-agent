@@ -174,8 +174,8 @@ async def health_check():
     try:
         agent_instance = get_agent()
         status = agent_instance.get_status()
-    status["api_version"] = config.get("version", "1.0.0")
-    return status
+        status["api_version"] = config.get("version", "1.0.0")
+        return status
     except Exception as e:
         logger.error(f"Health check failed: {e}")
         return {
