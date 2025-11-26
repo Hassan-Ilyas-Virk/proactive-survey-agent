@@ -38,7 +38,7 @@ def get_agent():
     global agent
     if agent is None:
         try:
-agent = ProactiveSurveyAgent()
+            agent = ProactiveSurveyAgent()
             logger.info("Agent initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize agent: {e}")
