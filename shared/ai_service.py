@@ -6,8 +6,8 @@ from typing import Optional, Dict, List
 
 # Load environment variables (safe for environments without .env)
 try:
-from dotenv import load_dotenv
-load_dotenv()
+    from dotenv import load_dotenv
+    load_dotenv()
 except Exception:
     pass  # .env file not needed in production (Vercel uses env vars)
 
@@ -26,8 +26,8 @@ except ImportError:
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if GEMINI_API_KEY and GENAI_AVAILABLE:
     try:
-    genai.configure(api_key=GEMINI_API_KEY)
-    logger.info("Gemini API configured successfully")
+        genai.configure(api_key=GEMINI_API_KEY)
+        logger.info("Gemini API configured successfully")
     except Exception as e:
         logger.warning(f"Failed to configure Gemini: {e}")
 elif not GEMINI_API_KEY:
