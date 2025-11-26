@@ -16,7 +16,11 @@
     "host": "localhost",
     "port": 8000,
     "auto_register": true,
-    "heartbeat_interval": 60
+    "heartbeat_interval": 60,
+    "allowed_origins": [
+      "https://supervisor.example.com",
+      "http://localhost:3000"
+    ]
   },
   
   "capabilities": [

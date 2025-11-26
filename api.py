@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 from datetime import datetime
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 import httpx
 from contextlib import asynccontextmanager
 
@@ -37,7 +38,7 @@ def get_agent():
     global agent
     if agent is None:
         try:
-            agent = ProactiveSurveyAgent()
+agent = ProactiveSurveyAgent()
             logger.info("Agent initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize agent: {e}")
@@ -121,6 +122,18 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# Configure CORS (from supervisor config)
+allowed_origins = config.get("supervisor", {}).get("allowed_origins", [])
+
+if allowed_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
 
 @app.post("/analyze", response_model=SurveyResponse)
 async def analyze_user(request: SurveyRequest):
@@ -161,8 +174,8 @@ async def health_check():
     try:
         agent_instance = get_agent()
         status = agent_instance.get_status()
-        status["api_version"] = config.get("version", "1.0.0")
-        return status
+    status["api_version"] = config.get("version", "1.0.0")
+    return status
     except Exception as e:
         logger.error(f"Health check failed: {e}")
         return {

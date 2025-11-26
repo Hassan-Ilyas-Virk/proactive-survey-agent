@@ -57,10 +57,10 @@ class ProactiveSurveyAgent(AbstractWorkerAgent):
         
         # Initialize LTM storage (file-based) with error handling
         try:
-            self.ltm = LTMFileStorage(
-                agent_name=self.agent_name,
-                base_path=config.get("ltm_config", {}).get("base_directory", "shared/LTM")
-            )
+        self.ltm = LTMFileStorage(
+            agent_name=self.agent_name,
+            base_path=config.get("ltm_config", {}).get("base_directory", "shared/LTM")
+        )
         except Exception as e:
             logger.warning(f"Failed to initialize LTM storage: {e}. Agent will continue without persistent storage.")
             # Create a dummy LTM object that doesn't persist

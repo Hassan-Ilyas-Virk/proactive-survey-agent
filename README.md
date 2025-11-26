@@ -162,6 +162,12 @@ curl -X POST https://proactive-survey-agent.vercel.app/analyze \
 ### Environment Variables
 
 - `GEMINI_API_KEY` (optional): Google Gemini API key for AI features
+- `ALLOWED_ORIGINS` (optional): Comma-separated list of frontend origins for CORS. Example for local dev:
+  ```bash
+  export ALLOWED_ORIGINS="http://localhost:3000,http://localhost:5173"
+  python main.py
+  ```
+  Set the same variable in your Vercel project settings for production (e.g. `https://your-frontend.vercel.app`).
 
 ### Configuration Files
 
