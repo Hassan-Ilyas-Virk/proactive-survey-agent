@@ -207,11 +207,25 @@ async def get_status():
 @app.get("/")
 async def root():
     """Root endpoint with API information"""
+    # Try to get agent status for storage info
+    storage_info = {"type": "unknown", "status": "unknown"}
+    try:
+        agent_instance = get_agent()
+        status = agent_instance.get_status()
+        storage_info = {
+            "type": status.get("storage_type", "unknown"),
+            "status": "connected" if status.get("storage_connected") else "disconnected"
+        }
+    except Exception:
+        # Agent might not be initialized yet
+        pass
+
     return {
         "service": config.get("agent_name", "Proactive Survey Agent"),
         "version": config.get("version", "1.0.0"),
         "type": config.get("agent_type", "survey_agent"),
         "status": "running",
+        "storage": storage_info,
         "capabilities": config.get("capabilities", []),
         "endpoints": {
             "analyze": "/analyze (POST) - Analyze user and trigger surveys",

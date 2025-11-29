@@ -388,6 +388,8 @@ class ProactiveSurveyAgent(AbstractWorkerAgent):
             "supervisor_id": self._supervisor_id,
             "current_task_id": self._current_task_id,
             "ltm_keys": ltm_keys,
+            "storage_type": "mongodb" if hasattr(self.ltm, 'collection') else "file",
+            "storage_connected": True if self.ltm else False,
             "queued_messages": len(self.message_queue),
             "timestamp": get_timestamp()
         }
