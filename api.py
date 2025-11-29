@@ -204,6 +204,41 @@ async def get_status():
     }
 
 
+@app.get("/debug/db-write")
+async def debug_db_write():
+    """Debug endpoint to test database writes"""
+    try:
+        agent_instance = get_agent()
+        if not agent_instance.ltm:
+             return {"status": "error", "message": "LTM not initialized"}
+        
+        test_key = f"debug_test_{get_timestamp()}"
+        test_value = {"test": "value", "timestamp": get_timestamp()}
+        
+        # Try explicit write
+        success = agent_instance.ltm.write(test_key, test_value)
+        
+        # Try explicit read back
+        read_value = agent_instance.ltm.read(test_key)
+        
+        return {
+            "status": "success" if success else "failure",
+            "write_success": success,
+            "read_back_success": read_value == test_value if success else False,
+            "storage_type": "mongodb" if hasattr(agent_instance.ltm, 'collection') else "file",
+            "key": test_key,
+            "value": test_value,
+            "read_value": read_value
+        }
+    except Exception as e:
+        import traceback
+        return {
+            "status": "error",
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        }
+
+
 @app.get("/")
 async def root():
     """Root endpoint with API information"""
