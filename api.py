@@ -206,11 +206,33 @@ async def get_status():
 
 @app.get("/debug/db-write")
 async def debug_db_write():
-    """Debug endpoint to test database writes"""
+    """Debug endpoint to test database writes and diagnose connection issues"""
+    import os
+    import importlib.util
+    
+    diagnostics = {
+        "env_var_set": bool(os.getenv("MONGODB_URI")),
+        "pymongo_installed": importlib.util.find_spec("pymongo") is not None,
+        "config_storage_type": config.get("ltm_config", {}).get("storage_type"),
+    }
+
     try:
         agent_instance = get_agent()
+        
+        # If we are in file mode, try to force a mongo connection to see why it fails
+        if not hasattr(agent_instance.ltm, 'collection'):
+            try:
+                from shared.utils import LTMDatabaseStorage
+                # Attempt connection
+                mongo_storage = LTMDatabaseStorage(agent_instance.agent_name, config.get("mongodb_config", {}))
+                diagnostics["manual_connection_test"] = "Success (Strange, why did it fall back?)"
+            except Exception as e:
+                diagnostics["manual_connection_error"] = str(e)
+                import traceback
+                diagnostics["manual_connection_traceback"] = traceback.format_exc()
+        
         if not agent_instance.ltm:
-             return {"status": "error", "message": "LTM not initialized"}
+             return {"status": "error", "message": "LTM not initialized", "diagnostics": diagnostics}
         
         test_key = f"debug_test_{get_timestamp()}"
         test_value = {"test": "value", "timestamp": get_timestamp()}
@@ -226,6 +248,7 @@ async def debug_db_write():
             "write_success": success,
             "read_back_success": read_value == test_value if success else False,
             "storage_type": "mongodb" if hasattr(agent_instance.ltm, 'collection') else "file",
+            "diagnostics": diagnostics,
             "key": test_key,
             "value": test_value,
             "read_value": read_value
@@ -235,7 +258,8 @@ async def debug_db_write():
         return {
             "status": "error",
             "error": str(e),
-            "traceback": traceback.format_exc()
+            "traceback": traceback.format_exc(),
+            "diagnostics": diagnostics
         }
 
 
