@@ -208,3 +208,106 @@ class LTMFileStorage:
             print(f"LTM List Error: {e}")
             return []
 
+
+class LTMDatabaseStorage:
+    """MongoDB-based Long-Term Memory storage"""
+    
+    def __init__(self, agent_name: str, config: dict):
+        self.agent_name = agent_name
+        self.collection_name = config.get("collection_name", "agent_memory")
+        self.db_name = config.get("db_name", "agent_db")
+        
+        # Get URI from env var or config
+        self.uri = os.getenv("MONGODB_URI")
+        
+        if not self.uri:
+            raise ValueError("MONGODB_URI environment variable not set")
+            
+        try:
+            import pymongo
+            self.client = pymongo.MongoClient(self.uri)
+            self.db = self.client[self.db_name]
+            self.collection = self.db[self.collection_name]
+            # Ensure index on agent_name and key
+            self.collection.create_index([("agent_name", 1), ("key", 1)], unique=True)
+        except ImportError:
+            raise ImportError("pymongo not installed. Please install it to use database storage.")
+        except Exception as e:
+            raise Exception(f"Failed to connect to MongoDB: {e}")
+
+    def write(self, key: str, value: Any) -> bool:
+        """Write key-value pair to DB"""
+        try:
+            filter_query = {"agent_name": self.agent_name, "key": key}
+            update_data = {
+                "$set": {
+                    "value": value,
+                    "updated_at": get_timestamp()
+                },
+                "$setOnInsert": {
+                    "created_at": get_timestamp()
+                }
+            }
+            self.collection.update_one(filter_query, update_data, upsert=True)
+            return True
+        except Exception as e:
+            print(f"DB Write Error: {e}")
+            return False
+
+    def read(self, key: str) -> Optional[Any]:
+        """Read value from DB"""
+        try:
+            doc = self.collection.find_one({"agent_name": self.agent_name, "key": key})
+            if doc:
+                return doc.get("value")
+            return None
+        except Exception as e:
+            print(f"DB Read Error: {e}")
+            return None
+
+    def delete(self, key: str) -> bool:
+        """Delete key from DB"""
+        try:
+            result = self.collection.delete_one({"agent_name": self.agent_name, "key": key})
+            return result.deleted_count > 0
+        except Exception as e:
+            print(f"DB Delete Error: {e}")
+            return False
+
+    def list_keys(self) -> list:
+        """List all keys for this agent in DB"""
+        try:
+            cursor = self.collection.find({"agent_name": self.agent_name}, {"key": 1})
+            return [doc["key"] for doc in cursor]
+        except Exception as e:
+            print(f"DB List Error: {e}")
+            return []
+
+
+def get_ltm_storage(agent_name: str, config: dict) -> Any:
+    """
+    Factory function to get LTM storage backend
+    
+    Args:
+        agent_name: Name of the agent
+        config: Full agent configuration dictionary
+        
+    Returns:
+        Storage instance (LTMFileStorage or LTMDatabaseStorage)
+    """
+    ltm_config = config.get("ltm_config", {})
+    storage_type = ltm_config.get("storage_type", "file")
+    
+    if storage_type == "mongodb":
+        try:
+            # Pass the specific mongodb config or the whole ltm_config
+            mongo_config = config.get("mongodb_config", {})
+            return LTMDatabaseStorage(agent_name, mongo_config)
+        except Exception as e:
+            print(f"Failed to initialize MongoDB storage: {e}. Falling back to file storage.")
+            # Fallback to file storage
+            return LTMFileStorage(agent_name, ltm_config.get("base_directory", "shared/LTM"))
+            
+    # Default to file storage
+    return LTMFileStorage(agent_name, ltm_config.get("base_directory", "shared/LTM"))
+

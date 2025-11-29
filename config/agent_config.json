@@ -4,13 +4,11 @@
   "agent_type": "survey_agent",
   "version": "1.0.0",
   "description": "Analyzes user interactions and triggers personalized feedback surveys",
-  
   "network": {
     "host": "localhost",
     "port": 8001,
     "protocol": "http"
   },
-  
   "supervisor": {
     "id": "SupervisorRegistry",
     "host": "localhost",
@@ -22,7 +20,6 @@
       "http://localhost:3000"
     ]
   },
-  
   "capabilities": [
     "survey_analysis",
     "sentiment_detection",
@@ -30,10 +27,14 @@
     "feedback_generation",
     "user_profiling"
   ],
-  
   "business_logic": {
     "survey_cooldown_days": 30,
-    "priority_levels": ["low", "medium", "high", "urgent"],
+    "priority_levels": [
+      "low",
+      "medium",
+      "high",
+      "urgent"
+    ],
     "survey_types": [
       "Product Experience",
       "Support Quality",
@@ -41,18 +42,19 @@
       "Engagement Check"
     ]
   },
-  
   "ltm_config": {
-    "storage_type": "file",
+    "storage_type": "mongodb",
     "base_directory": "shared/LTM/ProactiveSurveyAgent",
     "max_entries": 10000,
     "cleanup_interval_hours": 24
   },
-  
+  "mongodb_config": {
+    "db_name": "survey_agent_db",
+    "collection_name": "agent_memory"
+  },
   "logging": {
     "level": "INFO",
     "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     "log_file": "logs/proactive_survey_agent.log"
   }
 }
-

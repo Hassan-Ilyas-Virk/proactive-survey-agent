@@ -6,7 +6,7 @@ Shows all capabilities including AbstractWorkerAgent implementation
 import json
 import asyncio
 import httpx
-from agent import ProactiveSurveyAgent
+from agents.workers.proactive_survey_agent import ProactiveSurveyAgent
 
 
 def print_section(title):
@@ -83,7 +83,7 @@ def demo_abstract_worker():
     
     pref_001 = agent.read_from_ltm("user_pref_001")
     print(f"   Stored: user_pref_001 = {pref_001}")
-    print(f"   Total LTM entries: {len(agent.ltm_storage)}\n")
+    print(f"   Total LTM entries: {len(agent.ltm.list_keys())}\n")
     
     # Test process_task
     print("3. Process Task (Business Logic)")
