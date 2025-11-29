@@ -153,7 +153,7 @@ async def analyze_user(request: SurveyRequest):
         request_data = request.model_dump()
         
         # Process through agent
-        result = agent_instance.analyze_request(request_data)
+        result = agent_instance.process_task(request_data)
         
         # Send heartbeat to supervisor after successful operation
         await send_heartbeat()
