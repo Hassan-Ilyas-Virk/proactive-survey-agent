@@ -16,7 +16,7 @@
     "auto_register": true,
     "heartbeat_interval": 60,
     "allowed_origins": [
-      "https://supervisor.example.com",
+      "https://intelli-biz.vercel.app",
       "http://localhost:3000"
     ]
   },
